@@ -1,0 +1,79 @@
+---
+title: "COVID-19 Exploratory Data Analysis Report"
+author: "Dimeji Olayinka"
+date: "3/15/2020"
+output: html_document
+Class: INST408F Homework 1
+---
+# **Introduction**
+According to the CDC the COVID-19 spreads mainly from a person's contact wuth an infected indiviual. It can be a proximity witin 6 feet and physical contact with the contaminated surfaces, an infected person's respiratory droplets, or te actual infected individual themself. Symptoms include shortness of breath and fevers and coughs that get worse over time (Healthline). For prevention purposes Healthline adivses people to wash their hands frequently, consistently santize surfaces, refrain from touching your face, and distance yourself from those exhibiting symptoms. As for treatment, there is currently no cure sothe protocol is to manage symptoms and allow virus to pass. Currently the World Health Organization as of March 14th there are 142,539 confirmed cases globally. 
+
+
+# **Data Cleaning/Preparation**
+To initialize the data cleaning process I read both the coronavirus and comorbidity excel files into two seprate dataframes. Once loaded the dataframes were merged into one titled "data". When checking the variables and their values, I found ages 120 years and older to be implausible. To combat this I recoded all age values that high and above as NA. Also when parsing through the data I noticed that the Country variable had two different values for China, "Mainland China" and "China". I did not want to overspecify that value so I recoded those values to all equal "China"
+```{r}
+getwd()
+#I checked my working directoy
+setwd("C:/Users/Dimeji Olayinka/Downloads")
+#I set my working directory to the folder I wished to work with
+library(readxl)
+#Loaded the readxl library
+library(dplyr)
+#Loaded the dplyr library
+com <- read_excel("comorbidity.xlsx")
+#Import Comorbity file into com
+cor <- read_excel("coronavirus.xlsx")
+#Import Coronavirus file into cor
+data <-inner_join(cor, com, by="ID")
+#Inner joined both dataframes to keep observations existing in both files
+data$Age[data$Age>=120]<-NA
+#Assigned all ages 120 or greater with NA values
+data$Country[data$Country=="Mainland China"]<- "China"
+#Recode all country values within China as China
+```
+# **Exploratory Data Analysis**
+As part of my exploratory analysis I found the total number of observations and variables to be 1,764 and 12 respectively. When look at the percentages of patients by sex I found 49.9% to be female. To take a stronger focus on COVID-19, the data was filtered down to only patients who tested positive for the virus. The median age of this new coronavirus positive dataset was 28. When examining the deaths from the virus, the average age and the standard deviation was 28.4 years old and 16 years respectively.I moved from looking at age and sex the countries of origin for patients specifically China, Italy, and the United States. The leading country of focus was China with 51.3% positve tested patients hailing from there. The U.S followed suit with 10.1% and Italy had the least at .5%. Lastly I examined the comorbidity percentages among COVID-19 patients. The highest percentage was 71.3% patients exhibiting no other other chronic disease simultaneously. 15.3% had Lupus, 7.5% HIV, 3.9% Heart disease, and 1.9% with Liver disease.
+```{r}
+nrow(data)
+#Found the number of observations to be 1764
+ncol(data)
+#Found the number of variables to be 12
+prop.table(table(data$Sex))*100
+#Found the percentage of patientsto be 49.9% female
+corona <- filter(data, CoronaVirus == "1")
+#Took a subset of the data with only patients who have the virus.
+median(corona$Age,na.rm=T)
+#Found the median age of patients with the virus to be 28
+coronadeath <- filter(corona, Death == "1")
+#Took a subset of the data with only patients who have died from the virus
+mean(coronadeath$Age, na.rm=T) 
+#Found the mean age of those who died from the virus to be 28
+sd(coronadeath$Age, na.rm=T)
+#Found the standard deviation of the age of people who died from the virus to be 15.9
+prop.table(table(corona$Country))*100
+#Found 51.3%, .5%, and 10.1% to be the percentage of people with the virus from China, Italy and the U.S respectively 
+prop.table(table(corona$Comorbidity))*100
+#Found of all the patients who have the virus 3.9% have Heart disease, 7.5% have HIV, 1.9% have Liver disease, 15.3% Lupus, and 71.3% have are not pair simultaneously with another chronic disease.  
+```
+
+# **Data Visualization**
+For the visualization part of my analysis, I elected to go with a box plot with Coronovirus status as the catergorical variable and Age as the numerical. As seen from graph there is a larger perentage of those 15 years or older who test positive for the virus within the dataset, atleast 75%.This illustrates that within the dataset the COVID-19 is not too prevelant in preteens and young children. 
+
+```{r}
+#install.packages("summarytools")
+#Installed summarytools package
+library(ggplot2)
+#Loaded ggplot2 library
+library(summarytools)
+#Loaded summarytools library
+ggplot(data=data) +
+    geom_boxplot(mapping = aes(x=as.factor(CoronaVirus), y=Age,fill=as.factor(CoronaVirus))) +
+  #Assigned Coronovirus status as the catergorical variable and Age as the numerical for the boxplot
+   labs(title="Plot of Age by Coronavirus Diagnosis",x="Coronavirus (0=No, 1=Yes)", y = "Age", fill="Coronavirus")
+#Added a title and labels to the plot
+```
+
+# **References**
+Work Cited
+“Medical Information and Health Advice You Can Trust.” Healthline, Healthline Media, www.healthline.com/.
+“National Center for Emerging and Zoonotic Infectious Diseases (NCEZID).” Centers for Disease Control and Prevention, Centers for Disease Control and Prevention, 4 Mar. 2020, www.cdc.gov/ncezid/.
