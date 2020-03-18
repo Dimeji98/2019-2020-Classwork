@@ -1,0 +1,69 @@
+---
+title: "Relationship between Health Insurance Coverage and U.S Citizenship"
+output: html_notebook
+author: "Dimeji Olayinka"
+date: 12/17/2019
+class: INST314 Statistics in Information Science
+---
+
+
+
+# **Introduction**
+Among the many flaws and issues of the United States today, its healthcare and stance on immigration are in constant debate. I remember scrolling through a story reporting an undocumented person’s fear of going to emergency rooms when their health is a concern due to fear of deportation and lack of health finances. I was unsure just what factors contributed to these individual’s absence of health insurance. I suspected finances and citizenship status would have the strongest relationships. When parsing through the data and its variables, I wanted to find concise and easy to contemplate variables and values that would give the most telling analysis for interpretation. I found my response variable in the health insurance coverage, HICOV, variable as it only has two simple possible values; one, for having health coverage and two, for not having health coverage.  For my explanatory variable, I decided to go with citizenship status instead of finances because the latter fell under multiple variables while the former had one with five concise values. One for people born in the U.S and two for those born in Puerto Rico, Guam, Virgin Islands, and the Northern Marianas. Three, Four, and Five represented people born abroad with American parents, U.S citizens by naturalization, and non U.S citizens respectively. 
+
+
+```{r}
+acs<-read.csv("C:/Users/Dimeji Olayinka/Downloads/ACS_2017_MD_wadjwage",header=TRUE,sep=',')
+#Load data into dataframe called acs
+```
+# **Date Exploration**
+I placed both my explanatory and response variables into a two-way contingency table due to that fact both are categorical. I made the table twice with and without the sums because when I first added the margins I found the table a little difficult to read without borders. Printing the second table with no margins gave me a clearer picture. 
+
+```{r}
+insured <- table(acs$HICOV,acs$CIT)
+#I placed both my explanatory  and response variables into a two-way contingency table 
+addmargins(insured)
+#Added sum margins to the table
+insured
+#Printed the table without the margins for a clearer display
+```
+#**Data Visualization**
+To get a strong visual, I decided to visualize the data through a bar plot. The initial graph was not a good visual because of the very small total counts for two of the citizenship statuses. I found it would be better for me to convert the counts to column percentages so the data could display better on the plot. And to my convenience using proportions was successful as evident by the new graph below.
+This second box plot suggests the percentage of people without health insurance coverage gets higher among people with weaker or no citizenship status. From this I could surmise that there is some type of relationship between health insurance coverage and citizenship status, but I needed to conduct a legitimate test before I could be sure of this. 
+
+```{r}
+counts <- table(acs$HICOV, acs$CIT)
+barplot(counts, main="Insured and Uninsured Citizenship Statuses",
+  xlab="Citizenship Status", ylab= "Number of Insured", col=c("darkblue","red"),
+  legend = rownames(counts), beside=TRUE)
+#Intiates barplot with my two variables
+
+prop.table(table(acs$HICOV,acs$CIT),2)
+#Turns my counts into proportions
+
+counts <- prop.table(table(acs$HICOV,acs$CIT),2)
+barplot(counts, main="Insured and Uninsured Citizenship Statuses",
+  xlab="Citizenship Status", ylab= "Proportion of Insured/Uninsured", col=c("darkblue","red"),
+  legend = rownames(counts), beside=TRUE)
+#Intiates barplot using the proportions of my two variables
+```
+
+
+
+# **Analysis Technique**
+Because both of the variables I was dealing with were categorical, I understood that I would need to use a chi square test. The type of chi square test I chose to examine the dependency between the two variables was chi-square independence test. This was the appropriate selection because the data met the conditions for the test. I was looking at the relationship between two categorical variables with at least one having more than two levels, each case and count was independent of all the other cases, and I had at least five expected cases for each scenario.
+
+
+# **Presentation and Interpretation**
+The Hypotheses of the question are as follows. H0: citizenship status and health insurance coverage are independent. Health insurance does not vary by citizenship status, and HA: citizenship status and health insurance coverage are dependent. Health insurance does vary by citizenship status. With the hypotheses it was time for me to calculate the chi square test statistic. To do this I computed the expected counts for each cell and found the sum of all the counts. I found the sum to be 160.15. Once the chi square test statistic calculation was completed, I computed the degrees of freedom to be 4. After these two calculations, the final one to be made was the p value through R.
+
+```{r}
+pchisq(160.15,4, lower.tail = FALSE)
+```
+Because of the small size of the p value, I had enough evidence to reject the null hypothesis in favor of the alternative. In the context of my research question, the data offers convincing evidence that there is in fact an association to an individual's citizenship status and whether or not they have health insurance coverage. Although the data reveals proof of a connection, a concise conclusion on a causal relationship between the two variables cannot be reached due to the nature of the study. The data was collected through observation, meaning it was not in a controlled environment to make certain non tested variables did not have any influence on the results. Numerous factors such as an individual's finances, location, and beliefs could have impacted their health insurance coverage.
+
+# **Summary**
+ My research question was to find if an individual's citizenship status gave any indication on whether that person had health insurance coverage. Using the 2017 American Community Survey data for Maryland, I decided to focus on two variables. The response variable,  health insurance coverage (HICOV), and the explanatory variable was citizenship status (CIT).  I visualized the data through graphs and tables for a preview on the possible relationship between the variables. I came away with  the null hypothesis of citizenship status and health insurance coverage being independent and an alternate hypothesis stating citizenship status and health insurance coverage are dependent. To investigate these hypotheses I chose the chi-square independence test. The conditions of the test were met as both variables were categorical with at least one having more than two levels, each case and count was independent of all the other cases, and there were at least five expected cases for each scenario. After the completion of the test there was enough evidence to reject the null hypothesis in favor of the alternative. There is a relationship between an individual's citizenship status and whether or not they have health insurance coverage. Despite there being strong evidence of a relationship, we can not assume it is a causal one. This is because the study was observational. It was not safeguarded from outside factors influencing the results, so only an association can be concluded from the test. 
+
+
+
